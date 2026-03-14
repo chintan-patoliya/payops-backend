@@ -4,6 +4,8 @@ const Vendor = require('../models/vendor.model');
 const PayoutAudit = require('../models/payoutAudit.model');
 const APIError = require('../utils/APIError');
 const { payoutStatuses, payoutModes, auditActions, roles } = require('../config/vars');
+const { ERROR_MESSAGES, formatMessage } = require('../constants/messages');
+const { PAYOUT_STATUSES } = require('../constants');
 
 /**
  * Create audit trail entry
@@ -28,7 +30,7 @@ exports.list = async (req, res, next) => {
     if (status) {
       if (!Object.values(payoutStatuses).includes(status)) {
         throw new APIError({
-          message: `Invalid status filter. Allowed: ${Object.values(payoutStatuses).join(', ')}`,
+          message: formatMessage(ERROR_MESSAGES.INVALID_STATUS, { allowed: Object.values(payoutStatuses).join(', ') }),
           status: httpStatus.BAD_REQUEST,
         });
       }
@@ -96,7 +98,7 @@ exports.create = async (req, res, next) => {
     const vendor = await Vendor.findById(vendor_id);
     if (!vendor) {
       throw new APIError({
-        message: 'Vendor not found',
+        message: ERROR_MESSAGES.VENDOR_NOT_FOUND,
         status: httpStatus.BAD_REQUEST,
       });
     }
@@ -104,7 +106,7 @@ exports.create = async (req, res, next) => {
     // Validate amount
     if (!amount || amount <= 0) {
       throw new APIError({
-        message: 'Amount must be greater than 0',
+        message: ERROR_MESSAGES.INVALID_AMOUNT,
         status: httpStatus.BAD_REQUEST,
       });
     }
@@ -112,7 +114,7 @@ exports.create = async (req, res, next) => {
     // Validate mode
     if (!payoutModes.includes(mode)) {
       throw new APIError({
-        message: `Payment mode must be one of: ${payoutModes.join(', ')}`,
+        message: formatMessage(ERROR_MESSAGES.INVALID_MODE, { allowed: payoutModes.join(', ') }),
         status: httpStatus.BAD_REQUEST,
       });
     }
@@ -153,14 +155,14 @@ exports.submit = async (req, res, next) => {
 
     if (!payout) {
       throw new APIError({
-        message: 'Payout not found',
+        message: ERROR_MESSAGES.PAYOUT_NOT_FOUND,
         status: httpStatus.NOT_FOUND,
       });
     }
 
     if (payout.status !== payoutStatuses.DRAFT) {
       throw new APIError({
-        message: `Cannot submit payout. Current status is "${payout.status}". Only Draft payouts can be submitted.`,
+        message: formatMessage(ERROR_MESSAGES.CANNOT_SUBMIT, { status: payout.status }),
         status: httpStatus.BAD_REQUEST,
       });
     }

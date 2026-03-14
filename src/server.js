@@ -7,7 +7,7 @@ mongoose.connect();
 
 // Start server
 app.listen(port, () => {
-  console.log(`PayoutFlow API server started on port ${port} (${env})`);
+  console.log(`PayOps API server started on port ${port} (${env})`);
 });
 
 module.exports = app;

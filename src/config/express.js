@@ -23,11 +23,35 @@ app.use(compress());
 // Secure HTTP headers
 app.use(helmet());
 
-// Enable CORS
-app.use(cors({
-  origin: frontendUrl,
+// Enable CORS - allow multiple origins
+const allowedOrigins = [
+  frontendUrl,
+];
+
+// In development, allow all local network origins
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Allow configured origins
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // In development, allow any localhost or local network IP
+    if (process.env.NODE_ENV !== 'production') {
+      if (origin.match(/^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+):\d+$/)) {
+        return callback(null, true);
+      }
+    }
+    
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
-}));
+};
+
+app.use(cors(corsOptions));
 
 // Health check
 app.get('/health', (req, res) => {

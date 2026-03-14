@@ -11,7 +11,7 @@ module.exports = {
     uri: process.env.MONGO_URI,
   },
   jwt: {
-    secret: process.env.JWT_SECRET || 'payoutflow_default_secret',
+    secret: process.env.JWT_SECRET || 'payops_default_secret',
     expirationDays: process.env.JWT_EXPIRATION_DAYS || 7,
   },
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',

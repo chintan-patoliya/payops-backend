@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const User = require('../models/user.model');
 const APIError = require('../utils/APIError');
+const { ERROR_MESSAGES, formatMessage } = require('../constants/messages');
 
 /**
  * POST /api/auth/login
@@ -12,7 +13,7 @@ exports.login = async (req, res, next) => {
 
     if (!email || !password) {
       throw new APIError({
-        message: 'Email and password are required',
+        message: formatMessage(ERROR_MESSAGES.REQUIRED_FIELD, { field: 'Email and password' }),
         status: httpStatus.BAD_REQUEST,
       });
     }
@@ -20,7 +21,7 @@ exports.login = async (req, res, next) => {
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       throw new APIError({
-        message: 'Invalid email or password',
+        message: ERROR_MESSAGES.INVALID_CREDENTIALS,
         status: httpStatus.UNAUTHORIZED,
       });
     }
@@ -28,7 +29,7 @@ exports.login = async (req, res, next) => {
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       throw new APIError({
-        message: 'Invalid email or password',
+        message: ERROR_MESSAGES.INVALID_CREDENTIALS,
         status: httpStatus.UNAUTHORIZED,
       });
     }

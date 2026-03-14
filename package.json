@@ -1,13 +1,13 @@
 {
   "name": "payops-backend",
   "version": "1.0.0",
-  "description": "PayoutFlow MVP - Payout Management Backend API with Express, MongoDB, JWT & RBAC",
+  "description": "PayOps - Payout Management Backend API with Express, MongoDB, JWT & RBAC",
   "main": "src/server.js",
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
-    "start": "node src/server.js",
+    "start": "nodemon src/server.js",
     "dev": "nodemon src/server.js",
     "seed": "node src/seed/seed.js",
     "lint": "eslint ./src/ --ignore-path .gitignore"

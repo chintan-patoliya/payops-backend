@@ -1,6 +1,6 @@
-# PayoutFlow MVP — Backend API
+# PayOps — Backend API
 
-> Payout Management System backend built with **Node.js**, **Express.js**, **MongoDB Atlas**, and **JWT Authentication** with server-side **RBAC (Role-Based Access Control)**.
+> Payout Operations Management backend built with **Node.js**, **Express.js**, **MongoDB Atlas**, and **JWT Authentication** with server-side **RBAC (Role-Based Access Control)**.
 
 ---
 
@@ -21,17 +21,18 @@
 
 ## Tech Stack
 
-| Technology   | Purpose                    |
-|-------------|----------------------------|
-| Node.js     | Runtime                    |
-| Express.js  | REST API framework         |
-| MongoDB Atlas | Database (Free Tier)     |
-| Mongoose    | ODM for MongoDB            |
-| JWT         | Authentication tokens      |
-| bcryptjs    | Password hashing           |
-| helmet      | Security headers           |
-| cors        | Cross-origin requests      |
-| morgan      | HTTP request logging       |
+| Technology   | Version | Purpose                    |
+|-------------|---------|----------------------------|
+| Node.js     | >=18.0.0 | Runtime                   |
+| Express.js  | ^4.18.2 | REST API framework         |
+| MongoDB     | 6.x/7.x | Database (MongoDB Atlas)   |
+| Mongoose    | ^8.4.0  | ODM for MongoDB            |
+| JWT         | ^9.0.2  | Authentication tokens      |
+| bcryptjs    | ^2.4.3  | Password hashing           |
+| helmet      | ^7.1.0  | Security headers           |
+| cors        | ^2.8.5  | Cross-origin requests      |
+| morgan      | ^1.10.0 | HTTP request logging       |
+| nodemon     | ^3.1.0  | Development auto-restart   |
 
 ---
 
@@ -41,13 +42,16 @@
 payops-backend/
 ├── src/
 │   ├── config/
-│   │   ├── express.js        # Express app setup (middleware, routes, error handling)
+│   │   ├── express.js        # Express app setup (middleware, routes, error handling, CORS)
 │   │   ├── mongoose.js       # MongoDB connection
 │   │   └── vars.js           # Environment variables & constants
+│   ├── constants/
+│   │   ├── index.js          # Status enums, roles, payment modes, audit actions
+│   │   └── messages.js       # Error & success messages with formatMessage helper
 │   ├── controllers/
-│   │   ├── auth.controller.js     # Login handler
+│   │   ├── auth.controller.js     # Login handler with constant messages
 │   │   ├── vendor.controller.js   # Vendor CRUD
-│   │   └── payout.controller.js   # Payout CRUD + status transitions
+│   │   └── payout.controller.js   # Payout CRUD + status transitions with constants
 │   ├── middleware/
 │   │   ├── auth.js           # JWT authentication + RBAC authorization
 │   │   └── error.js          # Global error handler
@@ -58,9 +62,9 @@ payops-backend/
 │   │   └── payoutAudit.model.js   # Audit trail schema
 │   ├── routes/
 │   │   ├── index.js          # Route aggregator
-│   │   ├── auth.route.js     # /api/auth/*
-│   │   ├── vendor.route.js   # /api/vendors/*
-│   │   └── payout.route.js   # /api/payouts/*
+│   │   ├── auth.route.js     # /api/auth/* with API documentation
+│   │   ├── vendor.route.js   # /api/vendors/* with API documentation
+│   │   └── payout.route.js   # /api/payouts/* with API documentation
 │   ├── seed/
 │   │   └── seed.js           # Database seeder (creates demo users)
 │   ├── utils/
@@ -78,9 +82,17 @@ payops-backend/
 
 ### Prerequisites
 
-- **Node.js** >= 18.x
+- **Node.js** >= 18.0.0 (LTS recommended)
+- **npm** >= 9.0.0 (comes with Node.js)
 - **MongoDB Atlas** account (Free Tier) — [https://cloud.mongodb.com](https://cloud.mongodb.com)
-- **npm** or **yarn**
+  - MongoDB version: 6.x or 7.x
+  - Free M0 cluster is sufficient for development
+
+**Check your versions:**
+```bash
+node --version  # Should be >= 18.0.0
+npm --version   # Should be >= 9.0.0
+```
 
 ### 1. Clone the repository
 
@@ -106,7 +118,7 @@ Edit `.env` and fill in your MongoDB connection string and JWT secret:
 ```env
 PORT=5000
 NODE_ENV=development
-MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/payoutflow?retryWrites=true&w=majority
+MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/payops?retryWrites=true&w=majority
 JWT_SECRET=your_strong_random_secret_key
 JWT_EXPIRATION_DAYS=7
 FRONTEND_URL=http://localhost:3000
@@ -174,6 +186,59 @@ Passwords are hashed using **bcrypt** (10 salt rounds) — never stored in plain
 
 ---
 
+## Code Organization
+
+### Constants & Messages
+
+All constants and static messages are centralized in the `src/constants/` directory:
+
+**`constants/index.js`** - Application constants:
+- `PAYOUT_STATUSES`: Draft, Submitted, Approved, Rejected
+- `PAYMENT_MODES`: UPI, IMPS, NEFT
+- `USER_ROLES`: OPS, FINANCE
+- `AUDIT_ACTIONS`: CREATED, SUBMITTED, APPROVED, REJECTED
+
+**`constants/messages.js`** - All user-facing messages:
+- `ERROR_MESSAGES`: Authentication, validation, payout, vendor errors
+- `SUCCESS_MESSAGES`: Success feedback for all operations
+- `formatMessage(message, params)`: Helper to replace placeholders
+
+**Usage Example:**
+```javascript
+const { ERROR_MESSAGES, formatMessage } = require('../constants/messages');
+
+// Simple message
+throw new APIError({ message: ERROR_MESSAGES.PAYOUT_NOT_FOUND });
+
+// Message with placeholders
+throw new APIError({ 
+  message: formatMessage(ERROR_MESSAGES.CANNOT_SUBMIT, { status: payout.status })
+});
+```
+
+### CORS Configuration
+
+The backend supports flexible CORS for development and production:
+
+**Development Mode:**
+- Allows all localhost origins (any port)
+- Allows local network IPs (192.168.x.x, 10.x.x.x)
+- Automatically detects and allows local development servers
+
+**Production Mode:**
+- Strict origin checking
+- Only allows configured `FRONTEND_URL` from environment
+
+**Configuration** (`src/config/express.js`):
+```javascript
+// Automatically allows:
+// - http://localhost:3000, http://localhost:8080
+// - http://192.168.1.100:3000 (any local IP)
+// - Configured FRONTEND_URL
+```
+
+---
+
 ## API Endpoints
 
 ### Authentication
@@ -210,7 +275,7 @@ Passwords are hashed using **bcrypt** (10 salt rounds) — never stored in plain
 | Method | Endpoint                    | Auth Required | Role      | Description                         |
 |--------|-----------------------------|---------------|-----------|-------------------------------------|
 | GET    | `/api/payouts`              | Yes           | Any       | List payouts (filterable)           |
-| POST   | `/api/payouts`              | Yes           | OPS       | Create payout (status: Draft)       |
+| POST   | `/api/payouts`              | Yes           | Any       | Create payout (status: Draft)       |
 | GET    | `/api/payouts/:id`          | Yes           | Any       | Get payout detail + audit trail     |
 | POST   | `/api/payouts/:id/submit`   | Yes           | OPS       | Submit payout (Draft → Submitted)   |
 | POST   | `/api/payouts/:id/approve`  | Yes           | FINANCE   | Approve payout (Submitted → Approved)|
@@ -223,6 +288,37 @@ Passwords are hashed using **bcrypt** (10 salt rounds) — never stored in plain
 **Reject Request:**
 ```json
 { "decision_reason": "Amount exceeds limit" }
+```
+
+---
+
+## API Documentation
+
+All API routes include comprehensive inline documentation following the APIDoc format:
+
+- **@api** - HTTP method and endpoint path
+- **@apiDescription** - Clear endpoint description
+- **@apiVersion** - API version number
+- **@apiName** - Unique endpoint name
+- **@apiGroup** - Logical grouping (Auth, Vendors, Payouts)
+- **@apiPermission** - Access control requirements
+- **@apiHeader** - Required headers (e.g., Authorization)
+- **@apiParam** - Request parameters with types and constraints
+- **@apiParamExample** - Example request JSON
+- **@apiSuccess** - Success response structure
+- **@apiSuccessExample** - Example success response JSON
+- **@apiError** - Possible error responses with status codes
+- **@apiErrorExample** - Example error response JSON
+
+**Documentation Files:**
+- `src/routes/auth.route.js` - Authentication endpoints
+- `src/routes/vendor.route.js` - Vendor management endpoints
+- `src/routes/payout.route.js` - Payout workflow endpoints (9 total)
+
+**Generate HTML Documentation** (optional):
+```bash
+npm install -g apidoc
+apidoc -i src/routes/ -o docs/
 ```
 
 ---
