@@ -50,7 +50,7 @@ const router = express.Router();
  * @apiVersion 1.0.0
  * @apiName CreateVendor
  * @apiGroup Vendors
- * @apiPermission authenticated
+ * @apiPermission OPS
  *
  * @apiHeader {String} Authorization Bearer JWT token
  *
@@ -88,10 +88,11 @@ const router = express.Router();
  *
  * @apiError (Bad Request 400)  ValidationError  Vendor name is required
  * @apiError (Unauthorized 401) Unauthorized     Authentication required
+ * @apiError (Forbidden 403)    Forbidden        Only OPS can create vendors
  */
 router
   .route('/')
   .get(authenticate, controller.list)
-  .post(authenticate, controller.create);
+  .post(authenticate, authorize(OPS), controller.create);
 
 module.exports = router;

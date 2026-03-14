@@ -58,7 +58,7 @@ const router = express.Router();
  * @apiVersion 1.0.0
  * @apiName CreatePayout
  * @apiGroup Payouts
- * @apiPermission OPS, FINANCE
+ * @apiPermission OPS
  *
  * @apiHeader {String} Authorization Bearer JWT token
  *
@@ -99,12 +99,12 @@ const router = express.Router();
  *
  * @apiError (Bad Request 400)  ValidationError  Invalid vendor, amount, or mode
  * @apiError (Unauthorized 401) Unauthorized     Authentication required
- * @apiError (Forbidden 403)    Forbidden        Only OPS and FINANCE can create payouts
+ * @apiError (Forbidden 403)    Forbidden        Only OPS can create payouts
  */
 router
   .route('/')
   .get(authenticate, controller.list)
-  .post(authenticate, authorize(OPS, FINANCE), controller.create);
+  .post(authenticate, authorize(OPS), controller.create);
 
 /**
  * @api {get} /api/payouts/:id Get Payout Details

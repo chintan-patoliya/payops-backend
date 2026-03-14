@@ -26,6 +26,7 @@ app.use(helmet());
 // Enable CORS - allow multiple origins
 const allowedOrigins = [
   frontendUrl,
+  'https://payops-frontend-34pd-b8puevovi-chintan-patoliyas-projects.vercel.app',
 ];
 
 // In development, allow all local network origins

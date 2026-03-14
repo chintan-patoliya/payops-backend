@@ -265,21 +265,21 @@ The backend supports flexible CORS for development and production:
 
 ### Vendors
 
-| Method | Endpoint        | Auth Required | Role     | Description       |
-|--------|-----------------|---------------|----------|-------------------|
-| GET    | `/api/vendors`  | Yes           | Any      | List all vendors  |
-| POST   | `/api/vendors`  | Yes           | Any      | Create vendor     |
+| Method | Endpoint        | Auth Required | Role    | Description       |
+|--------|-----------------|---------------|---------|-------------------|
+| GET    | `/api/vendors`  | Yes           | Any     | List all vendors  |
+| POST   | `/api/vendors`  | Yes           | OPS     | Create a new vendor|
 
 ### Payouts
 
-| Method | Endpoint                    | Auth Required | Role      | Description                         |
-|--------|-----------------------------|---------------|-----------|-------------------------------------|
-| GET    | `/api/payouts`              | Yes           | Any       | List payouts (filterable)           |
-| POST   | `/api/payouts`              | Yes           | Any       | Create payout (status: Draft)       |
-| GET    | `/api/payouts/:id`          | Yes           | Any       | Get payout detail + audit trail     |
-| POST   | `/api/payouts/:id/submit`   | Yes           | OPS       | Submit payout (Draft → Submitted)   |
-| POST   | `/api/payouts/:id/approve`  | Yes           | FINANCE   | Approve payout (Submitted → Approved)|
-| POST   | `/api/payouts/:id/reject`   | Yes           | FINANCE   | Reject payout (Submitted → Rejected)|
+| Method | Endpoint                    | Auth Required | Role    | Description                         |
+|--------|-----------------------------|---------------|---------|-------------------------------------|
+| GET    | `/api/payouts`              | Yes           | Any     | List payouts (filterable)           |
+| POST   | `/api/payouts`              | Yes           | OPS     | Create payout (Draft status)       |
+| GET    | `/api/payouts/:id`          | Yes           | Any     | Get payout detail + audit trail     |
+| POST   | `/api/payouts/:id/submit`   | Yes           | OPS     | Submit payout (Draft → Submitted)   |
+| POST   | `/api/payouts/:id/approve`  | Yes           | FINANCE | Approve payout (Submitted → Approved)|
+| POST   | `/api/payouts/:id/reject`   | Yes           | FINANCE | Reject payout (Submitted → Rejected)|
 
 **Payout List Filters** (query params):
 - `status` — Filter by status (Draft, Submitted, Approved, Rejected)
